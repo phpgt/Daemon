@@ -1,0 +1,13 @@
+{
+	"name": "phpgt/daemon",
+	"description": "Background script execution with cross-platform compatible streaming.",
+
+	"require": {
+	},
+
+	"autoload": {
+		"psr-4":{
+			"\\Gt\\Daemon\\": "./src"
+		}
+	}
+}
