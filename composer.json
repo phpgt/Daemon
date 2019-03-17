@@ -3,6 +3,7 @@
 	"description": "Background script execution with cross-platform compatible streaming.",
 
 	"require": {
+		"php": ">=7.2"
 	},
 
 	"autoload": {

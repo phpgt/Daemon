@@ -2,20 +2,14 @@
 namespace Gt\Daemon;
 
 class Process {
-	public function __construct(
-		string $command,
-		array $descriptorspec = null,
-		array &$pipes = null,
-		string $cwd = null,
-		string $env = null
-	) {
+	public function __construct(string $command, string $cwd = null) {
 	}
 
 	public function isRunning():bool {
 
 	}
 
-	public function readOut():string {
+	public function read():string {
 
 	}
 
