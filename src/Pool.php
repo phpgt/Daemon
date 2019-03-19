@@ -72,7 +72,7 @@ class Pool {
 	public function readOutputOf(string $processName):string {
 		if(!array_key_exists($processName, $this->processList)
 		|| !is_resource($this->processList[$processName])) {
-			throw new \Exception("No process named $processName found .");
+			throw new Exception("No process named $processName found .");
 		}
 
 		return $this->processList[$processName]->getErrorOuput();
@@ -82,7 +82,7 @@ class Pool {
 	public function executeOne(string $processName) {
 		if(!array_key_exists( $processName ,$this->processList)
 		|| !is_resource($this->processList[$processName])) {
-			throw new \Exception("No process named $processName found .");
+			throw new Exception("No process named $processName found .");
 		}
 
 		$this->processList[$processName]->run();
