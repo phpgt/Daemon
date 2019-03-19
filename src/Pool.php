@@ -1,9 +1,8 @@
 <?php
 namespace Gt\Daemon;
 
-use \Exception;
-
 class Pool {
+	/** @var Process[] Associative array of name=>Process */
 	protected $processList;
 
 	public function __construct() {
@@ -14,93 +13,79 @@ class Pool {
 		$this->processList[$name] = $process;
 	}
 
-	/** Starts the execution of all proccesses */
-	public function exec() {
-		foreach($this->processList as $name=>$process ){
-			$process->run();
+	/** Starts the execution of all processes */
+	public function exec():void {
+		foreach($this->processList as $name => $process ) {
+			$process->exec();
 		}
 	}
 
     	public function numRunning():int {
 		$num = 0 ;
-		foreach($this->processList as $name=>$process){
-			$num += ($process->isAlive() ? 1 : 0);
+
+		foreach($this->processList as $name => $process) {
+			$num += (int)$process->isRunning();
 		}
 		
 		return $num;
 	}
 
-	/** Returns ouptput for all the proccesses in the $processList */
-	public function read():string {
+	/** Returns output for all the processes in the $processList */
+	public function read(int $pipe = Process::PIPE_OUT):string {
 		$output = "" ;
 		
-		foreach($this->processList as $name=>$process){
-			$out = $process->getOutput();
-			
-			if(!empty($out)){
-				$output .= "OUTPUT for [$name] : " . PHP_EOL . $out . PHP_EOL .PHP_EOL;
+		foreach($this->processList as $name => $process){
+			$outLines = explode(
+				PHP_EOL,
+				$process->getOutput($pipe)
+			);
+
+			foreach($outLines as $line) {
+				$line = trim($line);
+				if(strlen($line) === 0) {
+					continue;
+				}
+
+				if($pipe === Process::PIPE_ERROR) {
+					$output .= "[$name ERROR] $line";
+				}
+				else {
+					$output .= "[$name] $line";
+				}
+				$output .= PHP_EOL;
 			}
 		}
 
-		return $output ;
+		return $output;
 	}
 
-	/** Returns errors for all the proccesses in the $processList */
+	/** Returns errors for all the processes in the $processList */
 	public function readError():string {
-		$output = "" ;
-		
-		foreach($this->processList as $name=>$process){
-			$out = $process->getErrorOutput();
-			
-			if(!empty($out)){
-				$output .= "ERROR for [$name] : " . PHP_EOL . $out . PHP_EOL .PHP_EOL;
-			}
-		}
-
-		return $output ;
+		return $this->read(Process::PIPE_ERROR);
 	}
 
-	public function readErrorOf(string $processName):string {
-		if(!array_key_exists($processName, $this->processList)
-		|| !is_resource($this->processList[$processName])) {
-			throw new \Exception("No process named $processName found .");
+	public function readOutputOf(
+		string $name,
+		int $pipe = Process::PIPE_OUT
+	):string {
+		if(!array_key_exists($name, $this->processList)
+		|| !is_resource($this->processList[$name])) {
+			throw new DaemonException("No process named $name found.");
 		}
 
-		return $this->processList[$processName]->getErrorOuput();
+		$process = $this->processList[$name];
+		return $process->getOutput($pipe);
 	}
 
-	public function readOutputOf(string $processName):string {
-		if(!array_key_exists($processName, $this->processList)
-		|| !is_resource($this->processList[$processName])) {
-			throw new Exception("No process named $processName found .");
-		}
-
-		return $this->processList[$processName]->getErrorOuput();
+	public function readErrorOf(string $name):string {
+		return $this->readOutputOf($name, Process::PIPE_ERROR);
 	}
 
-	/** Executes only the proccess having $processName as a name */
-	public function executeOne(string $processName) {
-		if(!array_key_exists( $processName ,$this->processList)
-		|| !is_resource($this->processList[$processName])) {
-			throw new Exception("No process named $processName found .");
-		}
-
-		$this->processList[$processName]->run();
-	}
-
-	/**
-	* Stops all the processes and returns an array mapping each proccess name with it's return code
-	* This method should only be called if you want to stop the execution of all the processes
-	*
-	* example :
-	*      $return_codes = $pool->closeAll() ;
-	*      echo $return_codes['process1'] ; //assuming that the pool contained a process having 'process1' for name
-	*      //this will return the return code of 'process1'
-	*/
-	public function closeAll():array {
+	/** @return int[] Associative array of each closed process's exit code. */
+	public function close():array {
 		$codes = [] ;
 
-		foreach($this->processList as $name=>$process){
+		foreach($this->processList as $name => $process) {
 			$codes[$name] = $process->close();
 		}
 

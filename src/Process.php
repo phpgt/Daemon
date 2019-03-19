@@ -2,23 +2,27 @@
 namespace Gt\Daemon;
 
 class Process {
-	protected $command = "";
+	const PIPE_IN = 0;
+	const PIPE_OUT = 1;
+	const PIPE_ERROR = 2;
 
+	/** @var string */
+	protected $command;
 	/** @var array Indexed array of streams: 0=>input, 1=>output, 2=>error. */
 	protected $pipes;
 	/** @var resource The process as returned from proc_open. */
-	private $process = null;
+	protected $process = null;
+	protected $status;
 
 	public function __construct(string $command) {
 		$this->command = $command;
 	}
 
-
 	/**
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function run() {
+	public function exec() {
 		$descriptor = [
 			0 => ["pipe", "r"],
 			1 => ["pipe", "w"],
@@ -32,34 +36,42 @@ class Process {
 		);
 
 		if(!is_resource($this->process)) {
-			throw new \Exception("An unexpected error occurred while trying to run $this->command");
+			throw new DaemonException("An unexpected error occurred while trying to run $this->command.");
 		}
 
 		stream_set_blocking($this->pipes[1], 0);
 		stream_set_blocking($this->pipes[2], 0);
 		stream_set_blocking($this->pipes[0], 0);
+
+		$this->status = proc_get_status($this->process);
 	}
 
-	public function isAlive():bool {
+	public function isRunning():bool {
 		if(!is_resource($this->process)) {
 			return false;
 		}
 
-		return proc_get_status($this->process)["running"];
+// Special care has to be taken to not call proc_get_status more than once
+// after the process has ended. See https://php.net/manual/function.proc-get-status.php
+		if($this->status["running"]) {
+			$this->status = proc_get_status($this->process);
+		}
+
+		return $this->status["running"];
 	}
 
 	public function getCommand():string {
 		return $this->command;
 	}
 
-	public function getOutput():string {
+	public function getOutput(int $pipe = self::PIPE_OUT):string {
 		if(!is_resource($this->process)) {
-			throw new \Exception("This function should be called after the run method.");
+			throw new DaemonException("Process is not running.");
 		}
 
 		$output = "";
 
-		while($bytes = fread($this->pipes[1], 1024)) {
+		while($bytes = fread($this->pipes[$pipe], 1024)) {
 			$output .= $bytes;
 		}
 
@@ -67,17 +79,25 @@ class Process {
 	}
 
 	public function getErrorOutput():string {
-		if(!is_resource($this->process)) {
-			throw new \Exception("This function should be called after the run method.");
+		return $this->getOutput(self::PIPE_ERROR);
+	}
+
+	/** @return int|null Exit code or null if has not exited yet. */
+	public function getExitCode():?int {
+		if($this->isRunning()) {
+			return null;
 		}
 
-		$output = "";
+		return $this->status["exitcode"];
+	}
 
-		while($bytes = fread($this->pipes[2], 1024)) {
-			$output .= fread($this->pipes[2], 1024);
+	/** @return int|null Process ID or null if it has exited. */
+	public function getPid():?int {
+		if(!$this->isRunning()) {
+			return null;
 		}
 
-		return $output;
+		return $this->status["pid"];
 	}
 
 	/** Closes the thread and the streams then returns the return code of the command. */
