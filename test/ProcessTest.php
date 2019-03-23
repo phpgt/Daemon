@@ -1,62 +1,45 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sayya
- * Date: 18/03/2019
- * Time: 11:54
- */
-
 require "../src/Process.php";
 
-
 use Gt\Daemon\Process;
-use Gt\Daemon\Pool;
-
-
 
 // First, start both processes in the background.
 $procNum = new Process("php numbers.php");
 $procLet = new Process("php letters.php");
 
+$procList = [
+	"numbers" => $procNum,
+	"letters" => $procLet,
+];
+
 //running the proccesses
-$procNum->run();
-$procLet->run();
+$procNum->exec();
+$procLet->exec();
 
 $i = 0 ;
-// Quit if either process ends:
-while($procNum->isAlive() || $procLet->isAlive()) {
-// If the numbers process has output, show it to terminal:
-    $outputNum = $procNum->getOutput();
 
-    $errorNum = $procNum->getErrorOutput();
-    $outputNum .= $procNum->getOutput();
+do {
+	$numRunning = 0;
 
-    if(strlen($outputNum) > 0) {
-        echo  PHP_EOL .PHP_EOL . "Num output: " . $outputNum;
-    }
+	foreach($procList as $name => $proc) {
+		/** @var Process $proc */
+		if($proc->isRunning()) {
+			$numRunning++;
+		}
+		$output = $proc->getOutput();
+		$error = $proc->getErrorOutput();
 
-// If the numbers process has an error, show it to terminal:
-    if(strlen($errorNum) > 0) {
-        echo "Num error: " . $errorNum;
-    }
+		if(strlen($output) > 0) {
+			fwrite(STDOUT, "[$name] $output");
+		}
+		if(strlen($error) > 0) {
+			fwrite(STDOUT, "[$name ERROR] $error");
+		}
+	}
 
-// If the letters process has output, show it to terminal:
-    $outputLet = $procLet->getOutput();
-    $errorLet = $procLet->getErrorOutput();
-    if(strlen($outputLet) > 0) {
-        echo PHP_EOL .PHP_EOL . "Let output: "  . $outputLet;
-    }
-    $i++ ;
-// If the letters process has an error, show it to terminal:
-    if(strlen($errorLet) > 0) {
-        echo "Let error: " . $errorLet;
-    }
-
-    echo PHP_EOL;
-    echo "Waiting...";
-    echo PHP_EOL;
-    sleep(4);
+	usleep(100000);
 }
+while($numRunning > 0);
 
 echo "Program quit. Exit codes:" . PHP_EOL;
 echo "numbers.php exited with code " . $procNum->close() . PHP_EOL;
