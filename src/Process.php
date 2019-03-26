@@ -22,7 +22,7 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec() {
+	public function exec(bool $blocking = false) {
 		$descriptor = [
 			0 => ["pipe", "r"],
 			1 => ["pipe", "w"],
@@ -30,20 +30,22 @@ class Process {
 		];
 
 		$this->process = proc_open(
-			escapeshellcmd($this->command),
+			$this->command,
 			$descriptor,
 			$this->pipes
 		);
 
-		if(!is_resource($this->process)) {
-			throw new DaemonException("An unexpected error occurred while trying to run $this->command.");
-		}
+		$this->status = proc_get_status($this->process);
 
 		stream_set_blocking($this->pipes[1], 0);
 		stream_set_blocking($this->pipes[2], 0);
 		stream_set_blocking($this->pipes[0], 0);
 
-		$this->status = proc_get_status($this->process);
+		if($blocking) {
+			while($this->isRunning()) {
+				usleep(10000);
+			}
+		}
 	}
 
 	public function isRunning():bool {
