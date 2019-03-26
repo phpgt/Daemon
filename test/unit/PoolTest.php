@@ -194,4 +194,22 @@ class PoolTest extends TestCase {
 		self::assertEquals("Error from proc1", $output1);
 		self::assertEquals("Error from proc2", $output2);
 	}
+
+	public function testClose() {
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		$proc1->expects($this->once())
+			->method("close");
+
+		/** @var MockObject|Process $proc2*/
+		$proc2= self::createMock(Process::class);
+		$proc2->expects($this->once())
+			->method("close");
+
+		$sut = new Pool();
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		$sut->close();
+	}
 }
