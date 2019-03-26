@@ -23,4 +23,25 @@ class PoolTest extends TestCase {
 		$sut->add("test2", $proc2);
 		$sut->exec();
 	}
+
+	public function testNumRunning() {
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		$proc1->method("isRunning")
+			->willReturn(false);
+
+		/** @var MockObject|Process $proc2 */
+		$proc2 = self::createMock(Process::class);
+		$proc2->method("isRunning")
+			->willReturn(true);
+
+		$sut = new Pool();
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		self::assertEquals(
+			1,
+			$sut->numRunning()
+		);
+	}
 }
