@@ -8,14 +8,15 @@
 	"require-dev": {
 		"phpunit/phpunit": "8.*"
 	},
+
 	"autoload": {
 		"psr-4":{
-			"\\Gt\\Daemon\\": "./src"
+			"Gt\\Daemon\\": "./src"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"\\Gt\\Daemon\\Test\\": "./test/unit"
+			"Gt\\Daemon\\Test\\": "./test/unit"
 		}
 	}
 }
