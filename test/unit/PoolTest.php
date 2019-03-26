@@ -134,4 +134,40 @@ class PoolTest extends TestCase {
 			$error
 		);
 	}
+
+	public function testReadOutputOfNotExists() {
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		/** @var MockObject|Process $proc2*/
+		$proc2= self::createMock(Process::class);
+
+		$sut = new Pool();
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		self::expectExceptionMessage("No process named test3 found");
+		$sut->readOutputOf("test3");
+	}
+
+	public function testReadOutputOf() {
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		$proc1->method("getOutput")
+			->willReturn("Output from proc1");
+
+		/** @var MockObject|Process $proc2*/
+		$proc2= self::createMock(Process::class);
+		$proc2->method("getOutput")
+			->willReturn("Output from proc2");
+
+		$sut = new Pool();
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		$output2 = $sut->readOutputOf("test2");
+		$output1 = $sut->readOutputOf("test1");
+
+		self::assertEquals("Output from proc1", $output1);
+		self::assertEquals("Output from proc2", $output2);
+	}
 }

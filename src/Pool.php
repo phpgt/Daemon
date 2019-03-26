@@ -63,8 +63,7 @@ class Pool {
 		string $name,
 		int $pipe = Process::PIPE_OUT
 	):string {
-		if(!array_key_exists($name, $this->processList)
-		|| !is_resource($this->processList[$name])) {
+		if(!array_key_exists($name, $this->processList)) {
 			throw new DaemonException("No process named $name found.");
 		}
 
