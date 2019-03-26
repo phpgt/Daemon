@@ -15,26 +15,26 @@ class Pool {
 
 	/** Starts the execution of all processes */
 	public function exec():void {
-		foreach($this->processList as $name => $process ) {
+		foreach($this->processList as $name => $process) {
 			$process->exec();
 		}
 	}
 
-    	public function numRunning():int {
-		$num = 0 ;
+	public function numRunning():int {
+		$num = 0;
 
 		foreach($this->processList as $name => $process) {
 			$num += (int)$process->isRunning();
 		}
-		
+
 		return $num;
 	}
 
 	/** Returns output for all the processes in the $processList */
 	public function read(int $pipe = Process::PIPE_OUT):string {
-		$output = "" ;
-		
-		foreach($this->processList as $name => $process){
+		$output = "";
+
+		foreach($this->processList as $name => $process) {
 			$outLines = explode(
 				PHP_EOL,
 				$process->getOutput($pipe)
@@ -83,7 +83,7 @@ class Pool {
 
 	/** @return int[] Associative array of each closed process's exit code. */
 	public function close():array {
-		$codes = [] ;
+		$codes = [];
 
 		foreach($this->processList as $name => $process) {
 			$codes[$name] = $process->close();
