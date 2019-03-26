@@ -41,11 +41,6 @@ class Pool {
 			);
 
 			foreach($outLines as $line) {
-				$line = trim($line);
-				if(strlen($line) === 0) {
-					continue;
-				}
-
 				if($pipe === Process::PIPE_ERROR) {
 					$output .= "[$name ERROR] $line";
 				}
