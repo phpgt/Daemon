@@ -170,4 +170,28 @@ class PoolTest extends TestCase {
 		self::assertEquals("Output from proc1", $output1);
 		self::assertEquals("Output from proc2", $output2);
 	}
+
+	public function testReadErrorOf() {
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		$proc1->method("getOutput")
+			->with(Process::PIPE_ERROR)
+			->willReturn("Error from proc1");
+
+		/** @var MockObject|Process $proc2*/
+		$proc2= self::createMock(Process::class);
+		$proc2->method("getOutput")
+			->with(Process::PIPE_ERROR)
+			->willReturn("Error from proc2");
+
+		$sut = new Pool();
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		$output2 = $sut->readErrorOf("test2");
+		$output1 = $sut->readErrorOf("test1");
+
+		self::assertEquals("Error from proc1", $output1);
+		self::assertEquals("Error from proc2", $output2);
+	}
 }
