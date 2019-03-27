@@ -159,4 +159,14 @@ class ProcessTest extends TestCase {
 		$sut->exec();
 		self::assertIsInt($sut->getPid());
 	}
+
+	public function testExecBlocking() {
+		$sut = new Process("sleep 0.1");
+		$sut->exec();
+		self::assertTrue($sut->isRunning());
+
+		$sut = new Process("sleep 0.1");
+		$sut->exec(true);
+		self::assertFalse($sut->isRunning());
+	}
 }
