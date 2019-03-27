@@ -89,17 +89,6 @@ class ProcessTest extends TestCase {
 		);
 	}
 
-	public function testGetCommandEscaped() {
-		$rawCommand = "naughty|characters&need#escaping";
-		$sut = new Process($rawCommand);
-		$actualCommand = $sut->getCommand();
-
-		self::assertEquals(
-			"naughty\\|characters\\&need\\#escaping",
-			$actualCommand
-		);
-	}
-
 	public function testGetOutputNotRunning() {
 		self::expectExceptionMessage("Process is not running");
 		$sut = new Process("echo 'test-message'");
