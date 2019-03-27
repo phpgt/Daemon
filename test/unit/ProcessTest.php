@@ -131,4 +131,21 @@ class ProcessTest extends TestCase {
 		self::assertStringContainsString("not found", $errorOutput);
 		self::assertEmpty($output);
 	}
+
+	public function testGetExistCodeRunning() {
+		$sut = new Process("sleep 1");
+		$sut->exec();
+		self::assertNull($sut->getExitCode());
+	}
+
+	public function testGetExitCodeTerminate() {
+		$sut = new Process("echo 'quick'");
+		$sut->exec();
+
+		while($sut->isRunning()) {
+			usleep(100000);
+		}
+
+		self::assertEquals(0, $sut->getExitCode());
+	}
 }

@@ -18,6 +18,10 @@ class Process {
 		$this->command = escapeshellcmd($command);
 	}
 
+	public function __destruct() {
+		$this->terminate();
+	}
+
 	/**
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
@@ -99,11 +103,12 @@ class Process {
 	}
 
 	/** Closes the thread and the streams then returns the return code of the command. */
-	public function close():int {
-		array_filter($this->pipes, function($pipe) {
-			return fclose($pipe);
-		});
+	public function terminate(int $signal = 15):void {
+		proc_terminate($this->process, $signal);
 
-		return proc_close($this->process);
+		foreach($this->pipes as $i => $pipe) {
+			fclose($pipe);
+			unset($this->pipes[$i]);
+		}
 	}
 }
