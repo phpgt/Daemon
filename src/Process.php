@@ -49,10 +49,6 @@ class Process {
 	}
 
 	public function isRunning():bool {
-		if(!is_resource($this->process)) {
-			return false;
-		}
-
 // Special care has to be taken to not call proc_get_status more than once
 // after the process has ended. See https://php.net/manual/function.proc-get-status.php
 		if($this->status["running"]) {
