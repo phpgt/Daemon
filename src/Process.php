@@ -59,7 +59,7 @@ class Process {
 			$this->status = proc_get_status($this->process);
 		}
 
-		return $this->status["running"];
+		return (bool)$this->status["running"];
 	}
 
 	public function getCommand():string {
@@ -104,6 +104,10 @@ class Process {
 
 	/** Closes the thread and the streams then returns the return code of the command. */
 	public function terminate(int $signal = 15):void {
+		if(!is_resource($this->process)) {
+			return;
+		}
+
 		proc_terminate($this->process, $signal);
 
 		foreach($this->pipes as $i => $pipe) {

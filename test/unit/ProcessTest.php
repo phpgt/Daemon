@@ -148,4 +148,15 @@ class ProcessTest extends TestCase {
 
 		self::assertEquals(0, $sut->getExitCode());
 	}
+
+	public function testGetPidNotRunning() {
+		$sut = new Process("echo 'not running'");
+		self::assertNull($sut->getPid());
+	}
+
+	public function testGetPid() {
+		$sut = new Process("sleep 1");
+		$sut->exec();
+		self::assertIsInt($sut->getPid());
+	}
 }
