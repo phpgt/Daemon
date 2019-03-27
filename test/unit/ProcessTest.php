@@ -99,4 +99,22 @@ class ProcessTest extends TestCase {
 			$actualCommand
 		);
 	}
+
+	public function testGetOutputNotRunning() {
+		self::expectExceptionMessage("Process is not running");
+		$sut = new Process("echo 'test-message'");
+		$sut->getOutput();
+	}
+
+	public function testGetOutput() {
+		$sut = new Process("echo 'test-message'");
+		$sut->exec();
+
+		while($sut->isRunning()) {
+			usleep(100000);
+		}
+
+		$output = $sut->getOutput();
+		self::assertEquals("test-message\n", $output);
+	}
 }
