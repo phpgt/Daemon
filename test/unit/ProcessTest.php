@@ -117,4 +117,18 @@ class ProcessTest extends TestCase {
 		$output = $sut->getOutput();
 		self::assertEquals("test-message\n", $output);
 	}
+
+	public function testGetErrorOutput() {
+		$sut = new Process("/does/not/exist");
+		$sut->exec();
+
+		while($sut->isRunning()) {
+			usleep(100000);
+		}
+
+		$output = $sut->getOutput();
+		$errorOutput = $sut->getErrorOutput();
+		self::assertStringContainsString("not found", $errorOutput);
+		self::assertEmpty($output);
+	}
 }
