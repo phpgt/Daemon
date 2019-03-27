@@ -77,11 +77,22 @@ class Pool {
 
 	/** @return int[] Associative array of each closed process's exit code. */
 	public function close():array {
-		$codes = [];
-
 		foreach($this->processList as $name => $process) {
-			$codes[$name] = $process->close();
+			$process->terminate();
 		}
+
+		$codes = [];
+		do {
+			foreach($this->processList as $name => $process) {
+				$code = $process->getExitCode();
+				if(!is_null($code)) {
+					$codes[$name] = $code;
+				}
+			}
+
+			usleep(100000);
+		}
+		while(count($codes) < count($this->processList));
 
 		return $codes;
 	}

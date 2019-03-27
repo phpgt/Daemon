@@ -199,12 +199,14 @@ class PoolTest extends TestCase {
 		/** @var MockObject|Process $proc1 */
 		$proc1 = self::createMock(Process::class);
 		$proc1->expects($this->once())
-			->method("close");
+			->method("getExitCode")
+			->willReturn(0);
 
 		/** @var MockObject|Process $proc2*/
 		$proc2= self::createMock(Process::class);
 		$proc2->expects($this->once())
-			->method("close");
+			->method("getExitCode")
+			->willReturn(0);
 
 		$sut = new Pool();
 		$sut->add("test1", $proc1);
