@@ -15,7 +15,7 @@ class Process {
 	protected $status;
 
 	public function __construct(string $command) {
-		$this->command = $command;
+		$this->command = escapeshellcmd($command);
 	}
 
 	/**

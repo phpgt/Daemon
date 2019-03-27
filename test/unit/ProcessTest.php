@@ -88,4 +88,15 @@ class ProcessTest extends TestCase {
 			$actualCommand
 		);
 	}
+
+	public function testGetCommandEscaped() {
+		$rawCommand = "naughty|characters&need#escaping";
+		$sut = new Process($rawCommand);
+		$actualCommand = $sut->getCommand();
+
+		self::assertEquals(
+			"naughty\\|characters\\&need\\#escaping",
+			$actualCommand
+		);
+	}
 }
