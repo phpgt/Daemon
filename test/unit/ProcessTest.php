@@ -77,4 +77,15 @@ class ProcessTest extends TestCase {
 		$sut->exec(true);
 		self::assertEquals(127, $sut->getExitCode());
 	}
+
+	public function testGetCommand() {
+		$rawCommand = "/path/to/binary attr1key=attr1value --name='yes/no'";
+		$sut = new Process($rawCommand);
+		$actualCommand = $sut->getCommand();
+
+		self::assertEquals(
+			$rawCommand,
+			$actualCommand
+		);
+	}
 }
