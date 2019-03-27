@@ -117,7 +117,19 @@ class ProcessTest extends TestCase {
 
 		$output = $sut->getOutput();
 		$errorOutput = $sut->getErrorOutput();
-		self::assertStringContainsString("not found", $errorOutput);
+
+// Different shells produce different error wordings, all meaning the same.
+		$validWarnings = [
+			"no such file or directory",
+			"not found",
+		];
+		$foundWarning = false;
+		foreach($validWarnings as $warning) {
+			if(stristr($errorOutput, $warning)) {
+				$foundWarning = true;
+			}
+		}
+		self::assertTrue($foundWarning, "Warning must be found in error string");
 		self::assertEmpty($output);
 	}
 
