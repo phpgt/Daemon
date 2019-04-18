@@ -40,6 +40,12 @@ class Pool {
 				$process->getOutput($pipe)
 			);
 
+			foreach($outLines as $i => $line) {
+				if($line === "") {
+					unset($outLines[$i]);
+				}
+			}
+
 			foreach($outLines as $line) {
 				if($pipe === Process::PIPE_ERROR) {
 					$output .= "[$name ERROR] $line";
