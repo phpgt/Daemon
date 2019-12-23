@@ -26,15 +26,20 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec(bool $blocking = false) {
+	public function exec(bool $exec = true, bool $blocking = false) {
 		$descriptor = [
 			0 => ["pipe", "r"],
 			1 => ["pipe", "w"],
 			2 => ["pipe", "w"],
 		];
 
+		$cmd = $this->command;
+		if($exec) {
+			$cmd = "exec " . $cmd;
+		}
+
 		$this->process = proc_open(
-			$this->command,
+			$cmd,
 			$descriptor,
 			$this->pipes
 		);
