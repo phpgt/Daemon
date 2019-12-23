@@ -8,14 +8,22 @@ class Process {
 
 	/** @var string */
 	protected $command;
+	/** @var string */
+	protected $cwd;
 	/** @var array Indexed array of streams: 0=>input, 1=>output, 2=>error. */
 	protected $pipes;
 	/** @var resource The process as returned from proc_open. */
 	protected $process = null;
 	protected $status;
 
-	public function __construct(string $command) {
+	public function __construct(string $command, string $cwd = null) {
 		$this->command = $command;
+
+		if(is_null($cwd)) {
+			$cwd = getcwd();
+		}
+
+		$this->cwd = $cwd;
 	}
 
 	public function __destruct() {
@@ -32,6 +40,9 @@ class Process {
 			1 => ["pipe", "w"],
 			2 => ["pipe", "w"],
 		];
+
+		$oldCwd = getcwd();
+		chdir($this->cwd);
 
 		$this->process = proc_open(
 			$this->command,
@@ -50,6 +61,8 @@ class Process {
 				usleep(10000);
 			}
 		}
+
+		chdir($oldCwd);
 	}
 
 	public function isRunning():bool {
