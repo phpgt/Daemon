@@ -60,11 +60,12 @@ class Process {
 	public function isRunning():bool {
 // Special care has to be taken to not call proc_get_status more than once
 // after the process has ended. See https://php.net/manual/function.proc-get-status.php
-		if($this->status["running"]) {
+		if($this->status["running"] ?? null) {
 			$this->status = proc_get_status($this->process);
 		}
 
-		return (bool)$this->status["running"];
+		$running = $this->status["running"] ?? false;
+		return (bool)$running;
 	}
 
 	public function getCommand():string {
@@ -104,7 +105,7 @@ class Process {
 			return null;
 		}
 
-		return $this->status["pid"];
+		return $this->status["pid"] ?? null;
 	}
 
 	/** Closes the thread and the streams then returns the return code of the command. */

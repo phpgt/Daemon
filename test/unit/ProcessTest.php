@@ -74,7 +74,7 @@ class ProcessTest extends TestCase {
 
 	public function testExecFailure() {
 		$sut = new Process("/this/does/not/exist/" . uniqid());
-		$sut->exec(true);
+		$sut->exec(true, true);
 		self::assertEquals(127, $sut->getExitCode());
 	}
 
@@ -167,7 +167,7 @@ class ProcessTest extends TestCase {
 		self::assertTrue($sut->isRunning());
 
 		$sut = new Process("sleep 0.1");
-		$sut->exec(true);
+		$sut->exec(true, true);
 		self::assertFalse($sut->isRunning());
 	}
 }
