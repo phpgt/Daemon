@@ -34,18 +34,23 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec(bool $blocking = false) {
+	public function exec(bool $exec = true, bool $blocking = false) {
 		$descriptor = [
 			0 => ["pipe", "r"],
 			1 => ["pipe", "w"],
 			2 => ["pipe", "w"],
 		];
 
+		$cmd = $this->command;
+		if($exec) {
+			$cmd = "exec " . $cmd;
+		}
+
 		$oldCwd = getcwd();
 		chdir($this->cwd);
 
 		$this->process = proc_open(
-			$this->command,
+			$cmd,
 			$descriptor,
 			$this->pipes
 		);
@@ -68,11 +73,12 @@ class Process {
 	public function isRunning():bool {
 // Special care has to be taken to not call proc_get_status more than once
 // after the process has ended. See https://php.net/manual/function.proc-get-status.php
-		if($this->status["running"]) {
+		if($this->status["running"] ?? null) {
 			$this->status = proc_get_status($this->process);
 		}
 
-		return (bool)$this->status["running"];
+		$running = $this->status["running"] ?? false;
+		return (bool)$running;
 	}
 
 	public function getCommand():string {
@@ -112,7 +118,7 @@ class Process {
 			return null;
 		}
 
-		return $this->status["pid"];
+		return $this->status["pid"] ?? null;
 	}
 
 	/** Closes the thread and the streams then returns the return code of the command. */
