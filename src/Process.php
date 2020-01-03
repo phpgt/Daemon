@@ -130,7 +130,7 @@ class Process {
 	}
 
 	/** Closes the thread and the streams then returns the return code of the command. */
-	public function terminate(int $signal = 15):void {
+	public function terminate(int $signal = Signal::TERM):void {
 		if(!is_resource($this->process)) {
 			return;
 		}

@@ -3,7 +3,8 @@
 	"description": "Background script execution with cross-platform compatible streaming.",
 
 	"require": {
-		"php": ">=7.4"
+		"php": ">=7.4",
+		"ext-pcntl": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "8.*"
