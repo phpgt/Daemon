@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Daemon\Test;
 
+use Gt\Daemon\CommandNotFoundException;
 use Gt\Daemon\Process;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
@@ -60,7 +61,7 @@ class ProcessTest extends TestCase {
 		if(!is_dir(dirname($tmpFile))) {
 			mkdir(dirname($tmpFile), 0775, true);
 		}
-		$command = PHP_BINARY . " -r 'touch(\"$tmpFile\");'";
+		$command = [PHP_BINARY, "-r", "touch(\"$tmpFile\");"];
 		$sut = new Process($command);
 
 		self::assertFileNotExists($tmpFile);
@@ -73,13 +74,18 @@ class ProcessTest extends TestCase {
 	}
 
 	public function testExecFailure() {
-		$sut = new Process("/this/does/not/exist/" . uniqid());
-		$sut->exec(true, true);
+		$sut = new Process(["/this/does/not/exist/" . uniqid()]);
+		$sut->setBlocking();
+		$sut->exec();
 		self::assertEquals(127, $sut->getExitCode());
 	}
 
 	public function testGetCommand() {
-		$rawCommand = "/path/to/binary attr1key=attr1value --name='yes/no'";
+		$rawCommand = [
+			"/path/to/binary",
+			"attr1key=attr1value",
+			"--name='yes/no'",
+		];
 		$sut = new Process($rawCommand);
 		$actualCommand = $sut->getCommand();
 
@@ -96,7 +102,7 @@ class ProcessTest extends TestCase {
 	}
 
 	public function testGetOutput() {
-		$sut = new Process("echo 'test-message'");
+		$sut = new Process(["echo", "test-message"]);
 		$sut->exec();
 
 		while($sut->isRunning()) {
@@ -107,30 +113,11 @@ class ProcessTest extends TestCase {
 		self::assertEquals("test-message\n", $output);
 	}
 
-	public function testGetErrorOutput() {
-		$sut = new Process("/does/not/exist");
+	public function testExecutingNonExistantCommand() {
+		$sut = new Process(["/does/not/exist"]);
+
+		self::expectException(CommandNotFoundException::class);
 		$sut->exec();
-
-		while($sut->isRunning()) {
-			usleep(100000);
-		}
-
-		$output = $sut->getOutput();
-		$errorOutput = $sut->getErrorOutput();
-
-// Different shells produce different error wordings, all meaning the same.
-		$validWarnings = [
-			"no such file or directory",
-			"not found",
-		];
-		$foundWarning = false;
-		foreach($validWarnings as $warning) {
-			if(stristr($errorOutput, $warning)) {
-				$foundWarning = true;
-			}
-		}
-		self::assertTrue($foundWarning, "Warning must be found in error string");
-		self::assertEmpty($output);
 	}
 
 	public function testGetExistCodeRunning() {
@@ -167,7 +154,8 @@ class ProcessTest extends TestCase {
 		self::assertTrue($sut->isRunning());
 
 		$sut = new Process("sleep 0.1");
-		$sut->exec(true, true);
+		$sut->setBlocking();
+		$sut->exec();
 		self::assertFalse($sut->isRunning());
 	}
 }

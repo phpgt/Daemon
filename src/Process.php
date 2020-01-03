@@ -6,7 +6,7 @@ class Process {
 	const PIPE_OUT = 1;
 	const PIPE_ERROR = 2;
 
-	/** @var string */
+	/** @var string[] */
 	protected $command;
 	/** @var string */
 	protected $cwd;
@@ -15,8 +15,11 @@ class Process {
 	/** @var resource The process as returned from proc_open. */
 	protected $process = null;
 	protected $status;
+	/** @var bool */
+	protected $isBlocking = false;
 
-	public function __construct(string $command, string $cwd = null) {
+	/** @param string[] $command List of arguments to execute */
+	public function __construct(array $command, string $cwd = null) {
 		$this->command = $command;
 
 		if(is_null($cwd)) {
@@ -34,34 +37,33 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec(bool $exec = true, bool $blocking = false) {
+	public function exec() {
 		$descriptor = [
-			0 => ["pipe", "r"],
-			1 => ["pipe", "w"],
-			2 => ["pipe", "w"],
+			self::PIPE_IN => ["pipe", "r"],
+			self::PIPE_OUT => ["pipe", "w"],
+			self::PIPE_ERROR => ["pipe", "w"],
 		];
-
-		$cmd = $this->command;
-		if($exec) {
-			$cmd = "exec " . $cmd;
-		}
 
 		$oldCwd = getcwd();
 		chdir($this->cwd);
 
 		$this->process = proc_open(
-			$cmd,
+			$this->command,
 			$descriptor,
 			$this->pipes
 		);
 
 		$this->status = proc_get_status($this->process);
 
+		if($this->status["exitcode"] === 127) {
+			throw new CommandNotFoundException($this->command[0]);
+		}
+
 		stream_set_blocking($this->pipes[1], 0);
 		stream_set_blocking($this->pipes[2], 0);
 		stream_set_blocking($this->pipes[0], 0);
 
-		if($blocking) {
+		if($this->isBlocking) {
 			while($this->isRunning()) {
 				usleep(10000);
 			}
@@ -81,7 +83,7 @@ class Process {
 		return (bool)$running;
 	}
 
-	public function getCommand():string {
+	public function getCommand():array {
 		return $this->command;
 	}
 
@@ -133,5 +135,9 @@ class Process {
 			fclose($pipe);
 			unset($this->pipes[$i]);
 		}
+	}
+
+	public function setBlocking(bool $blocking = true):void {
+		$this->isBlocking = $blocking;
 	}
 }
