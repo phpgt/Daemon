@@ -18,19 +18,17 @@ class Process {
 	/** @var bool */
 	protected $isBlocking = false;
 
-	/** @param string[] $command List of arguments to execute */
-	public function __construct(array $command, string $cwd = null) {
+	public function __construct(string...$command) {
 		$this->command = $command;
-
-		if(is_null($cwd)) {
-			$cwd = getcwd();
-		}
-
-		$this->cwd = $cwd;
+		$this->cwd = getcwd();
 	}
 
 	public function __destruct() {
 		$this->terminate();
+	}
+
+	public function setExecCwd(string $cwd):void {
+		$this->cwd = $cwd;
 	}
 
 	/**
@@ -53,15 +51,11 @@ class Process {
 			$this->pipes
 		);
 
-		$this->status = proc_get_status($this->process);
+		usleep(1000);
 
-		if($this->status["exitcode"] === 127) {
-			throw new CommandNotFoundException($this->command[0]);
-		}
-
-		stream_set_blocking($this->pipes[1], 0);
-		stream_set_blocking($this->pipes[2], 0);
-		stream_set_blocking($this->pipes[0], 0);
+		stream_set_blocking($this->pipes[0], false);
+		stream_set_blocking($this->pipes[1], false);
+		stream_set_blocking($this->pipes[2], false);
 
 		if($this->isBlocking) {
 			while($this->isRunning()) {
@@ -69,18 +63,30 @@ class Process {
 			}
 		}
 
+		$this->refreshStatus();
+
+		if($this->status["exitcode"] === 127) {
+			throw new CommandNotFoundException($this->command[0]);
+		}
+
 		chdir($oldCwd);
 	}
 
 	public function isRunning():bool {
-// Special care has to be taken to not call proc_get_status more than once
-// after the process has ended. See https://php.net/manual/function.proc-get-status.php
-		if($this->status["running"] ?? null) {
-			$this->status = proc_get_status($this->process);
-		}
+		$this->refreshStatus();
 
 		$running = $this->status["running"] ?? false;
 		return (bool)$running;
+	}
+
+	public function hasNotEnded():bool {
+		$this->refreshStatus();
+		$running = $this->isRunning();
+		if($running) {
+			return true;
+		}
+
+		return $this->status["exitcode"] === 0;
 	}
 
 	public function getCommand():array {
@@ -139,5 +145,19 @@ class Process {
 
 	public function setBlocking(bool $blocking = true):void {
 		$this->isBlocking = $blocking;
+	}
+
+	/**
+	 * Special care has to be taken to not call proc_get_status more than
+	 * once after the process has ended.
+	 * @see https://php.net/manual/function.proc-get-status.php
+	 **/
+	protected function refreshStatus():void {
+		if($this->status["running"] ?? null
+		|| empty($this->status)) {
+			if(is_resource($this->process)) {
+				$this->status = proc_get_status($this->process);
+			}
+		}
 	}
 }
