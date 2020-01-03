@@ -6,7 +6,7 @@ class Process {
 	const PIPE_OUT = 1;
 	const PIPE_ERROR = 2;
 
-	/** @var string */
+	/** @var string[] */
 	protected $command;
 	/** @var string */
 	protected $cwd;
@@ -15,73 +15,81 @@ class Process {
 	/** @var resource The process as returned from proc_open. */
 	protected $process = null;
 	protected $status;
+	/** @var bool */
+	protected $isBlocking = false;
 
-	public function __construct(string $command, string $cwd = null) {
+	public function __construct(string...$command) {
 		$this->command = $command;
-
-		if(is_null($cwd)) {
-			$cwd = getcwd();
-		}
-
-		$this->cwd = $cwd;
+		$this->cwd = getcwd();
 	}
 
 	public function __destruct() {
 		$this->terminate();
 	}
 
+	public function setExecCwd(string $cwd):void {
+		$this->cwd = $cwd;
+	}
+
 	/**
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec(bool $exec = true, bool $blocking = false) {
+	public function exec() {
 		$descriptor = [
-			0 => ["pipe", "r"],
-			1 => ["pipe", "w"],
-			2 => ["pipe", "w"],
+			self::PIPE_IN => ["pipe", "r"],
+			self::PIPE_OUT => ["pipe", "w"],
+			self::PIPE_ERROR => ["pipe", "w"],
 		];
-
-		$cmd = $this->command;
-		if($exec) {
-			$cmd = "exec " . $cmd;
-		}
 
 		$oldCwd = getcwd();
 		chdir($this->cwd);
 
 		$this->process = proc_open(
-			$cmd,
+			$this->command,
 			$descriptor,
 			$this->pipes
 		);
 
-		$this->status = proc_get_status($this->process);
+		usleep(1000);
 
-		stream_set_blocking($this->pipes[1], 0);
-		stream_set_blocking($this->pipes[2], 0);
-		stream_set_blocking($this->pipes[0], 0);
+		stream_set_blocking($this->pipes[0], false);
+		stream_set_blocking($this->pipes[1], false);
+		stream_set_blocking($this->pipes[2], false);
 
-		if($blocking) {
+		if($this->isBlocking) {
 			while($this->isRunning()) {
 				usleep(10000);
 			}
+		}
+
+		$this->refreshStatus();
+
+		if($this->status["exitcode"] === 127) {
+			throw new CommandNotFoundException($this->command[0]);
 		}
 
 		chdir($oldCwd);
 	}
 
 	public function isRunning():bool {
-// Special care has to be taken to not call proc_get_status more than once
-// after the process has ended. See https://php.net/manual/function.proc-get-status.php
-		if($this->status["running"] ?? null) {
-			$this->status = proc_get_status($this->process);
-		}
+		$this->refreshStatus();
 
 		$running = $this->status["running"] ?? false;
 		return (bool)$running;
 	}
 
-	public function getCommand():string {
+	public function hasNotEnded():bool {
+		$this->refreshStatus();
+		$running = $this->isRunning();
+		if($running) {
+			return true;
+		}
+
+		return $this->status["exitcode"] === 0;
+	}
+
+	public function getCommand():array {
 		return $this->command;
 	}
 
@@ -132,6 +140,24 @@ class Process {
 		foreach($this->pipes as $i => $pipe) {
 			fclose($pipe);
 			unset($this->pipes[$i]);
+		}
+	}
+
+	public function setBlocking(bool $blocking = true):void {
+		$this->isBlocking = $blocking;
+	}
+
+	/**
+	 * Special care has to be taken to not call proc_get_status more than
+	 * once after the process has ended.
+	 * @see https://php.net/manual/function.proc-get-status.php
+	 **/
+	protected function refreshStatus():void {
+		if($this->status["running"] ?? null
+		|| empty($this->status)) {
+			if(is_resource($this->process)) {
+				$this->status = proc_get_status($this->process);
+			}
 		}
 	}
 }
