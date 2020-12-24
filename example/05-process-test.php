@@ -4,8 +4,8 @@ require "../src/Process.php";
 use Gt\Daemon\Process;
 
 // First, start both processes in the background.
-$procNum = new Process("php numbers.php");
-$procLet = new Process("php letters.php");
+$procLet = new Process("php 03-letters.php");
+$procNum = new Process("php 04-numbers.php");
 
 $procList = [
 	"numbers" => $procNum,

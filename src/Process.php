@@ -51,7 +51,7 @@ class Process {
 			$this->pipes
 		);
 
-		usleep(1000);
+		usleep(10000);
 
 		stream_set_blocking($this->pipes[0], false);
 		stream_set_blocking($this->pipes[1], false);

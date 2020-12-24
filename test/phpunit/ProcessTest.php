@@ -64,7 +64,7 @@ class ProcessTest extends TestCase {
 		}
 		$sut = new Process(PHP_BINARY, "-r", "touch(\"$tmpFile\");");
 
-		self::assertFileNotExists($tmpFile);
+		self::assertFileDoesNotExist($tmpFile);
 		$sut->exec();
 		while($sut->isRunning()) {
 			usleep(100000);
