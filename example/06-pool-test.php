@@ -7,8 +7,8 @@ require_once '../src/Process.php';
 
 $pool = new Pool();
 
-$pool->add("Numbers", new Process("php numbers.php"));
-$pool->add("Letters", new Process("php letters.php"));
+$pool->add("Letters", new Process("php 03-letters.php"));
+$pool->add("Numbers", new Process("php 04-numbers.php"));
 $pool->add("Ping", new Process("ping google.com"));
 
 $pool->exec();
