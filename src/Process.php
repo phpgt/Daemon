@@ -20,6 +20,7 @@ class Process {
 	public function __construct(string...$command) {
 		$this->command = $command;
 		$this->cwd = getcwd();
+		$this->pipes = [];
 	}
 
 	public function __destruct() {
