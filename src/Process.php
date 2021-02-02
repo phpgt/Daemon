@@ -6,21 +6,21 @@ class Process {
 	const PIPE_OUT = 1;
 	const PIPE_ERROR = 2;
 
-	/** @var string[] */
-	protected $command;
-	/** @var string */
-	protected $cwd;
-	/** @var array Indexed array of streams: 0=>input, 1=>output, 2=>error. */
-	protected $pipes;
+	/** @var array<int, string> */
+	protected array $command;
+	protected string $cwd;
+	/** @var array<int, resource> Indexed array of streams: 0=>input, 1=>output, 2=>error. */
+	protected array $pipes;
 	/** @var resource The process as returned from proc_open. */
 	protected $process = null;
-	protected $status;
-	/** @var bool */
-	protected $isBlocking = false;
+	/** @var array<string, mixed> */
+	protected array $status;
+	protected bool $isBlocking = false;
 
 	public function __construct(string...$command) {
 		$this->command = $command;
 		$this->cwd = getcwd();
+		$this->pipes = [];
 	}
 
 	public function __destruct() {
@@ -35,7 +35,7 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 */
-	public function exec() {
+	public function exec():void {
 		$descriptor = [
 			self::PIPE_IN => ["pipe", "r"],
 			self::PIPE_OUT => ["pipe", "w"],
@@ -45,7 +45,11 @@ class Process {
 		$oldCwd = getcwd();
 		chdir($this->cwd);
 
+		// Parameter #1 of proc_open is an array
+		// @see https://www.php.net/manual/en/function.proc-open.php
+
 		$this->process = proc_open(
+		/** @phpstan-param string[] */
 			$this->command,
 			$descriptor,
 			$this->pipes
@@ -89,6 +93,7 @@ class Process {
 		return $this->status["exitcode"] === 0;
 	}
 
+	/** @return array<int, string> */
 	public function getCommand():array {
 		return $this->command;
 	}
@@ -153,8 +158,8 @@ class Process {
 	 * @see https://php.net/manual/function.proc-get-status.php
 	 **/
 	protected function refreshStatus():void {
-		if($this->status["running"] ?? null
-		|| empty($this->status)) {
+		$running = $this->status["running"] ?? null;
+		if($running || empty($this->status)) {
 			if(is_resource($this->process)) {
 				$this->status = proc_get_status($this->process);
 			}
