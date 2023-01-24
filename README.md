@@ -5,7 +5,7 @@ Execute background processes asynchronously using an object oriented process poo
 
 ***
 
-<a href="https://circleci.com/gh/PhpGt/Daemon" target="_blank">
+<a href="https://github.com/PhpGt/Daemon/actions" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-build.svg" alt="Build status" />
 </a>
 <a href="https://scrutinizer-ci.com/g/PhpGt/Daemon" target="_blank">

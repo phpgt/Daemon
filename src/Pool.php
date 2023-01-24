@@ -3,13 +3,13 @@ namespace Gt\Daemon;
 
 class Pool {
 	/** @var Process[] Associative array of name=>Process */
-	protected $processList;
+	protected array $processList;
 
 	public function __construct() {
 		$this->processList = [];
 	}
 
-	public function add(string $name, Process $process) {
+	public function add(string $name, Process $process):void {
 		$this->processList[$name] = $process;
 	}
 
