@@ -163,4 +163,12 @@ class ProcessTest extends TestCase {
 		$sut->exec();
 		self::assertFalse($sut->isRunning());
 	}
+
+	public function testSetEnv() {
+		$sut = new Process("printenv");
+		$sut->setEnv("NAME", "PHPUnit");
+		$sut->exec();
+		$output = $sut->getOutput();
+		self::assertStringContainsString("NAME=PHPUnit\n", $output);
+	}
 }
