@@ -171,4 +171,14 @@ class ProcessTest extends TestCase {
 		$output = $sut->getOutput();
 		self::assertStringContainsString("NAME=PHPUnit\n", $output);
 	}
+
+	public function testSetEnv_multiple() {
+		$sut = new Process("printenv");
+		$sut->setEnv("NAME", "PHPUnit");
+		$sut->setEnv("TEST", "setEnv");
+		$sut->exec();
+		$output = $sut->getOutput();
+		self::assertStringContainsString("TEST=setEnv\n", $output);
+		self::assertStringContainsString("NAME=PHPUnit\n", $output);
+	}
 }
