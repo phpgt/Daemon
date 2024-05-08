@@ -15,7 +15,7 @@ class Pool {
 
 	/** Starts the execution of all processes */
 	public function exec():void {
-		foreach($this->processList as $name => $process) {
+		foreach($this->processList as $process) {
 			$process->exec();
 		}
 	}
@@ -23,7 +23,7 @@ class Pool {
 	public function numRunning():int {
 		$num = 0;
 
-		foreach($this->processList as $name => $process) {
+		foreach($this->processList as $process) {
 			$num += (int)$process->isRunning();
 		}
 
