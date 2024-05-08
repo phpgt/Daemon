@@ -16,6 +16,8 @@ class Process {
 	/** @var array<string, mixed> */
 	protected array $status;
 	protected bool $isBlocking = false;
+	/** @var array<string, string> */
+	protected array $env = [];
 
 	public function __construct(string...$command) {
 		$this->command = $command;
@@ -29,6 +31,10 @@ class Process {
 
 	public function setExecCwd(string $cwd):void {
 		$this->cwd = $cwd;
+	}
+
+	public function setEnv(string $key, string $value):void {
+		$this->env[$key] = $value;
 	}
 
 	/**
@@ -54,7 +60,7 @@ class Process {
 			$this->command,
 			$descriptor,
 			$this->pipes,
-//			env_vars: $this->env,
+			env_vars: $this->env,
 		);
 		if(!$this->process) {
 			throw new CommandNotFoundException($this->command[0]);
