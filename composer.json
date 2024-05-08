@@ -3,12 +3,14 @@
 	"description": "Background script execution with cross-platform compatible streaming.",
 
 	"require": {
-		"php": ">=7.4",
+		"php": ">=8.1",
 		"ext-pcntl": "*"
 	},
 	"require-dev": {
-		"phpstan/phpstan": "^v1.8",
-		"phpunit/phpunit": "^v9.5"
+		"phpstan/phpstan": "^v1.10",
+		"phpunit/phpunit": "^10.5",
+		"phpmd/phpmd": "^2.13",
+		"squizlabs/php_codesniffer": "^3.7"
 	},
 
 	"autoload": {
