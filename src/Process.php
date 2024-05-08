@@ -48,12 +48,15 @@ class Process {
 		// Parameter #1 of proc_open is an array
 		// @see https://www.php.net/manual/en/function.proc-open.php
 
-		$this->process = proc_open(
-		/** @phpstan-param string[] */
+		$this->process = @proc_open(
 			$this->command,
 			$descriptor,
-			$this->pipes
+			$this->pipes,
+//			env_vars: $this->env,
 		);
+		if(!$this->process) {
+			throw new CommandNotFoundException($this->command[0]);
+		}
 
 		usleep(10000);
 
@@ -122,7 +125,7 @@ class Process {
 			return null;
 		}
 
-		return $this->status["exitcode"];
+		return $this->status["exitcode"] ?? 127;
 	}
 
 	/** @return int|null Process ID or null if it has exited. */
