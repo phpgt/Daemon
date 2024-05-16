@@ -17,12 +17,13 @@ class Process {
 	protected array $status;
 	protected bool $isBlocking = false;
 	/** @var array<string, string> */
-	protected array $env = [];
+	protected array $env;
 
 	public function __construct(string...$command) {
 		$this->command = $command;
 		$this->cwd = getcwd();
 		$this->pipes = [];
+		$this->env = getenv();
 	}
 
 	public function __destruct() {
