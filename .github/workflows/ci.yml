@@ -60,7 +60,7 @@ jobs:
           XDEBUG_MODE: cover
         with:
           php_version: ${{ matrix.php }}
-          php_extensions: xdebug
+          php_extensions: xdebug pcntl
           coverage_text: _coverage/coverage.txt
           coverage_clover: _coverage/clover.xml
 
