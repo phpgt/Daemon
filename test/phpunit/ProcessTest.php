@@ -181,4 +181,23 @@ class ProcessTest extends TestCase {
 		self::assertStringContainsString("TEST=setEnv\n", $output);
 		self::assertStringContainsString("NAME=PHPUnit\n", $output);
 	}
+
+	public function testOnComplete():void {
+		$sut = new Process(PHP_BINARY, "-r", "usleep(10000);");
+		$sut->setBlocking();
+
+		$callbackCount = 0;
+		$completedProcess = null;
+		$sut->onComplete(function(Process $process) use (&$callbackCount, &$completedProcess) {
+			$callbackCount++;
+			$completedProcess = $process;
+		});
+
+		$sut->exec();
+		$sut->isRunning();
+		$sut->getExitCode();
+
+		self::assertSame(1, $callbackCount);
+		self::assertSame($sut, $completedProcess);
+	}
 }
