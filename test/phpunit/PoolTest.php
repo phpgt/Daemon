@@ -214,4 +214,39 @@ class PoolTest extends TestCase {
 
 		$sut->close();
 	}
+
+	public function testOnComplete():void {
+		$proc1Callback = null;
+		$proc2Callback = null;
+
+		/** @var MockObject|Process $proc1 */
+		$proc1 = self::createMock(Process::class);
+		$proc1->expects($this->once())
+			->method("onComplete")
+			->willReturnCallback(function(callable $callback) use (&$proc1Callback):void {
+				$proc1Callback = $callback;
+			});
+
+		/** @var MockObject|Process $proc2 */
+		$proc2 = self::createMock(Process::class);
+		$proc2->expects($this->once())
+			->method("onComplete")
+			->willReturnCallback(function(callable $callback) use (&$proc2Callback):void {
+				$proc2Callback = $callback;
+			});
+
+		$completedProcesses = [];
+
+		$sut = new Pool();
+		$sut->onComplete(function(Process $process) use (&$completedProcesses):void {
+			$completedProcesses[] = $process;
+		});
+		$sut->add("test1", $proc1);
+		$sut->add("test2", $proc2);
+
+		$proc2Callback($proc2);
+		$proc1Callback($proc1);
+
+		self::assertSame([$proc2, $proc1], $completedProcesses);
+	}
 }

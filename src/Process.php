@@ -18,12 +18,17 @@ class Process {
 	protected bool $isBlocking = false;
 	/** @var array<string, string> */
 	protected array $env;
+	/** @var array<int, callable(Process):void> */
+	protected array $completeCallbackList;
+	protected bool $hasCompleted;
 
 	public function __construct(string...$command) {
 		$this->command = $command;
 		$this->cwd = getcwd();
 		$this->pipes = [];
 		$this->env = getenv();
+		$this->completeCallbackList = [];
+		$this->hasCompleted = false;
 	}
 
 	public function __destruct() {
@@ -36,6 +41,15 @@ class Process {
 
 	public function setEnv(string $key, string $value):void {
 		$this->env[$key] = $value;
+	}
+
+	public function onComplete(callable $callback):void {
+		if($this->hasCompleted) {
+			$callback($this);
+			return;
+		}
+
+		array_push($this->completeCallbackList, $callback);
 	}
 
 	/**
@@ -80,6 +94,7 @@ class Process {
 		}
 
 		$this->refreshStatus();
+		$this->dispatchCompletionCallback();
 
 		if($this->status["exitcode"] === 127) {
 			throw new CommandNotFoundException($this->command[0]);
@@ -90,6 +105,7 @@ class Process {
 
 	public function isRunning():bool {
 		$this->refreshStatus();
+		$this->dispatchCompletionCallback();
 
 		$running = $this->status["running"] ?? false;
 		return (bool)$running;
@@ -175,6 +191,21 @@ class Process {
 			if(is_resource($this->process)) {
 				$this->status = proc_get_status($this->process);
 			}
+		}
+	}
+
+	protected function dispatchCompletionCallback():void {
+		if($this->hasCompleted || empty($this->status)) {
+			return;
+		}
+
+		if($this->status["running"] ?? false) {
+			return;
+		}
+
+		$this->hasCompleted = true;
+		foreach($this->completeCallbackList as $callback) {
+			$callback($this);
 		}
 	}
 }
