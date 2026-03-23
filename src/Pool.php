@@ -4,13 +4,25 @@ namespace Gt\Daemon;
 class Pool {
 	/** @var Process[] Associative array of name=>Process */
 	protected array $processList;
+	/** @var array<int, callable(Process):void> */
+	protected array $completeCallbackList;
 
 	public function __construct() {
 		$this->processList = [];
+		$this->completeCallbackList = [];
 	}
 
 	public function add(string $name, Process $process):void {
 		$this->processList[$name] = $process;
+		$process->onComplete(
+			function(Process $completedProcess):void {
+				$this->dispatchCompletionCallback($completedProcess);
+			}
+		);
+	}
+
+	public function onComplete(callable $callback):void {
+		$this->completeCallbackList[] = $callback;
 	}
 
 	/** Starts the execution of all processes */
@@ -101,5 +113,11 @@ class Pool {
 		while(count($codes) < count($this->processList));
 
 		return $codes;
+	}
+
+	protected function dispatchCompletionCallback(Process $process):void {
+		foreach($this->completeCallbackList as $callback) {
+			$callback($process);
+		}
 	}
 }
