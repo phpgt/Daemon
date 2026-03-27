@@ -68,3 +68,9 @@ Outputs something similar to:
 ```
 
 Notice how the date process is only set to loop three times, and after it is complete the other two infinite processes continue to run.
+
+# Proudly sponsored by
+
+[JetBrains Open Source sponsorship program](https://www.jetbrains.com/community/opensource/)
+
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://www.jetbrains.com/community/opensource/)
