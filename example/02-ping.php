@@ -1,8 +1,8 @@
 <?php
 require __DIR__ . "/../vendor/autoload.php";
 
-use Gt\Daemon\Pool;
-use Gt\Daemon\Process;
+use GT\Daemon\Pool;
+use GT\Daemon\Process;
 
 $pool = new Pool();
 $pool->add("Google", new Process("ping google.com"));

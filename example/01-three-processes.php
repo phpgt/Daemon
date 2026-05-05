@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . "/../vendor/autoload.php";
-use Gt\Daemon\Process;
-use Gt\Daemon\Pool;
+use GT\Daemon\Process;
+use GT\Daemon\Pool;
 
 // Create three long-running processes:
 $pingProcess = new Process("ping google.com");

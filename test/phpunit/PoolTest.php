@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Daemon\Test;
+namespace GT\Daemon\Test;
 
-use Gt\Daemon\Pool;
-use Gt\Daemon\Process;
+use GT\Daemon\Pool;
+use GT\Daemon\Process;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

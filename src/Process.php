@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Daemon;
+namespace GT\Daemon;
 
 class Process {
 	const PIPE_IN = 0;

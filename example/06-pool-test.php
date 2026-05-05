@@ -1,6 +1,6 @@
 <?php
-use \Gt\Daemon\Pool;
-use \Gt\Daemon\Process;
+use GT\Daemon\Pool;
+use GT\Daemon\Process;
 
 require_once '../src/Pool.php';
 require_once '../src/Process.php';
