@@ -1,9 +1,9 @@
 <?php
-namespace Gt\Daemon\Test;
+namespace GT\Daemon\Test;
 
-use Gt\Daemon\CommandNotFoundException;
-use Gt\Daemon\DaemonException;
-use Gt\Daemon\Process;
+use GT\Daemon\CommandNotFoundException;
+use GT\Daemon\DaemonException;
+use GT\Daemon\Process;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

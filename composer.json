@@ -15,12 +15,13 @@
 
 	"autoload": {
 		"psr-4":{
+			"GT\\Daemon\\": "./src",
 			"Gt\\Daemon\\": "./src"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Gt\\Daemon\\Test\\": "./test/phpunit"
+			"GT\\Daemon\\Test\\": "./test/phpunit"
 		}
 	},
 

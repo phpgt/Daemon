@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Daemon;
+namespace GT\Daemon;
 
 class Pool {
 	/** @var Process[] Associative array of name=>Process */
