@@ -86,11 +86,11 @@ class PoolTest extends TestCase {
 		);
 
 		self::assertStringContainsString(
-			"[test2 ERROR] Here is an error from proc2",
+			"[test2 *] Here is an error from proc2",
 			$error
 		);
 		self::assertStringContainsString(
-			"[test1 ERROR] Here is an error from proc1",
+			"[test1 *] Here is an error from proc1",
 			$error
 		);
 	}
@@ -126,11 +126,11 @@ class PoolTest extends TestCase {
 
 		$error = $sut->readError();
 		self::assertStringContainsString(
-			"[test2 ERROR] Here is an error from proc2",
+			"[test2 *] Here is an error from proc2",
 			$error
 		);
 		self::assertStringContainsString(
-			"[test1 ERROR] Here is an error from proc1",
+			"[test1 *] Here is an error from proc1",
 			$error
 		);
 	}

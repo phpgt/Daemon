@@ -33,7 +33,7 @@ do {
 			fwrite(STDOUT, "[$name] $output");
 		}
 		if(strlen($error) > 0) {
-			fwrite(STDOUT, "[$name ERROR] $error");
+			fwrite(STDOUT, "[$name *] $error");
 		}
 	}
 
