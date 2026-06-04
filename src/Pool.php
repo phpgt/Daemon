@@ -60,7 +60,7 @@ class Pool {
 
 			foreach($outLines as $line) {
 				if($pipe === Process::PIPE_ERROR) {
-					$output .= "[$name ERROR] $line";
+					$output .= "[$name *] $line";
 				}
 				else {
 					$output .= "[$name] $line";
