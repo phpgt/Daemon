@@ -1,9 +1,9 @@
 <?php
-namespace Gt\Daemon\Test;
+namespace GT\Daemon\Test;
 
-use Gt\Daemon\CommandNotFoundException;
-use Gt\Daemon\DaemonException;
-use Gt\Daemon\Process;
+use GT\Daemon\CommandNotFoundException;
+use GT\Daemon\DaemonException;
+use GT\Daemon\Process;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -180,5 +180,24 @@ class ProcessTest extends TestCase {
 		$output = $sut->getOutput();
 		self::assertStringContainsString("TEST=setEnv\n", $output);
 		self::assertStringContainsString("NAME=PHPUnit\n", $output);
+	}
+
+	public function testOnComplete():void {
+		$sut = new Process(PHP_BINARY, "-r", "usleep(10000);");
+		$sut->setBlocking();
+
+		$callbackCount = 0;
+		$completedProcess = null;
+		$sut->onComplete(function(Process $process) use (&$callbackCount, &$completedProcess) {
+			$callbackCount++;
+			$completedProcess = $process;
+		});
+
+		$sut->exec();
+		$sut->isRunning();
+		$sut->getExitCode();
+
+		self::assertSame(1, $callbackCount);
+		self::assertSame($sut, $completedProcess);
 	}
 }

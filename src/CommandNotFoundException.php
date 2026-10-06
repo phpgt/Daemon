@@ -1,4 +1,4 @@
 <?php
-namespace Gt\Daemon;
+namespace GT\Daemon;
 
 class CommandNotFoundException extends DaemonException {}

@@ -8,16 +8,16 @@ Execute background processes asynchronously using an object oriented process poo
 <a href="https://github.com/PhpGt/Daemon/actions" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-build.svg" alt="Build status" />
 </a>
-<a href="https://scrutinizer-ci.com/g/PhpGt/Daemon" target="_blank">
+<a href="https://app.codacy.com/gh/PhpGt/Daemon" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-quality.svg" alt="Code quality" />
 </a>
-<a href="https://scrutinizer-ci.com/g/PhpGt/Daemon" target="_blank">
+<a href="https://app.codecov.io/gh/PhpGt/Daemon" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-coverage.svg" alt="Code coverage" />
 </a>
 <a href="https://packagist.org/packages/PhpGt/Daemon" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-version.svg" alt="Current version" />
 </a>
-<a href="https://www.php.gt/eaemon" target="_blank">
+<a href="https://www.php.gt/deaemon" target="_blank">
 	<img src="https://badge.status.php.gt/daemon-docs.svg" alt="PHP.G/Daemon documentation" />
 </a>
 
@@ -25,8 +25,8 @@ Execute background processes asynchronously using an object oriented process poo
 
 ```php
 <?php
-use Gt\Daemon\Process;
-use Gt\Daemon\Pool;
+use GT\Daemon\Process;
+use GT\Daemon\Pool;
 
 // Create three long-running processes:
 $pingProcess = new Process("ping google.com");
@@ -68,3 +68,9 @@ Outputs something similar to:
 ```
 
 Notice how the date process is only set to loop three times, and after it is complete the other two infinite processes continue to run.
+
+# Proudly sponsored by
+
+[JetBrains Open Source sponsorship program](https://www.jetbrains.com/community/opensource/)
+
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://www.jetbrains.com/community/opensource/)

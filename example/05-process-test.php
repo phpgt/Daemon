@@ -1,7 +1,7 @@
 <?php
 require "../src/Process.php";
 
-use Gt\Daemon\Process;
+use GT\Daemon\Process;
 
 // First, start both processes in the background.
 $procLet = new Process("php 03-letters.php");
@@ -33,7 +33,7 @@ do {
 			fwrite(STDOUT, "[$name] $output");
 		}
 		if(strlen($error) > 0) {
-			fwrite(STDOUT, "[$name ERROR] $error");
+			fwrite(STDOUT, "[$name *] $error");
 		}
 	}
 

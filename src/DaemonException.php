@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Daemon;
+namespace GT\Daemon;
 
 use RuntimeException;
 
