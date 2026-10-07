@@ -7,7 +7,7 @@
 		"ext-pcntl": "*"
 	},
 	"require-dev": {
-		"phpstan/phpstan": "^v1.10",
+		"phpstan/phpstan": "^v2.2",
 		"phpunit/phpunit": "^10.5",
 		"phpmd/phpmd": "^2.13",
 		"squizlabs/php_codesniffer": "^4.0"
