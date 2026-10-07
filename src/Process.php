@@ -56,7 +56,7 @@ class Process {
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
 	 *
-	 * @SuppressWarnings(PHPMD.ErrorControlOperator)
+	 * @SuppressWarnings("PHPMD.ErrorControlOperator")
 	 */
 	public function exec():void {
 		$descriptor = [
