@@ -44,21 +44,28 @@ class Process {
 	}
 
 	public function onComplete(callable $callback):void {
+		array_push($this->completeCallbackList, $callback);
 		if($this->hasCompleted) {
 			$callback($this);
-			return;
 		}
-
-		array_push($this->completeCallbackList, $callback);
 	}
 
 	/**
 	 * Runs the command in a concurrent thread.
 	 * Sets the input, output and errors streams.
-	 *
-	 * @SuppressWarnings("PHPMD.ErrorControlOperator")
 	 */
 	public function exec():void {
+		if($this->isRunning()) {
+			throw new DaemonException("Process is already running.");
+		}
+
+		if(is_resource($this->process)) {
+			$this->terminate();
+			proc_close($this->process);
+		}
+		$this->status = [];
+		$this->hasCompleted = false;
+
 		$descriptor = [
 			self::PIPE_IN => ["pipe", "r"],
 			self::PIPE_OUT => ["pipe", "w"],
@@ -68,6 +75,19 @@ class Process {
 		$oldCwd = getcwd();
 		chdir($this->cwd);
 
+		try {
+			$this->startProcess($descriptor);
+		}
+		finally {
+			chdir($oldCwd);
+		}
+	}
+
+	/**
+	 * @param array<int, array<int, string>> $descriptor
+	 * @SuppressWarnings("PHPMD.ErrorControlOperator")
+	 */
+	private function startProcess(array $descriptor):void {
 		// Parameter #1 of proc_open is an array
 		// @see https://www.php.net/manual/en/function.proc-open.php
 		// phpcs:ignore
@@ -99,10 +119,9 @@ class Process {
 		if($this->status["exitcode"] === 127) {
 			throw new CommandNotFoundException($this->command[0]);
 		}
-
-		chdir($oldCwd);
 	}
 
+	/** @phpstan-impure */
 	public function isRunning():bool {
 		$this->refreshStatus();
 		$this->dispatchCompletionCallback();
@@ -127,13 +146,14 @@ class Process {
 	}
 
 	public function getOutput(int $pipe = self::PIPE_OUT):string {
-		if(!is_resource($this->process)) {
+		if(!is_resource($this->process) || !isset($this->pipes[$pipe])) {
 			throw new DaemonException("Process is not running.");
 		}
 
 		$output = "";
 
-		while($bytes = fread($this->pipes[$pipe], 1024)) {
+		while(($bytes = fread($this->pipes[$pipe], 1024)) !== false
+		&& $bytes !== "") {
 			$output .= $bytes;
 		}
 
