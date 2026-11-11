@@ -46,10 +46,10 @@ class Pool {
 	public function read(int $pipe = Process::PIPE_OUT):string {
 		$output = "";
 
-		foreach($this->processList as $name => $process) {
+		foreach(array_keys($this->processList) as $name) {
 			$outLines = explode(
 				PHP_EOL,
-				$process->getOutput($pipe)
+				$this->readOutputOf($name, $pipe)
 			);
 
 			foreach($outLines as $i => $line) {
