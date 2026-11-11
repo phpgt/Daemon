@@ -69,7 +69,8 @@ Outputs something similar to:
 
 Notice how the date process is only set to loop three times, and after it is complete the other two infinite processes continue to run.
 
-## Automatically restarting workers
+Automatically restarting workers
+--------------------------------
 
 `ContinuousPool` extends `Pool` with a non-blocking `tick()` method and a configurable restart delay (one second by default). Use `isActive()` for the supervising loop: `numRunning()` can be zero while completed workers wait to restart. `close()` cancels restarts before stopping workers, and unread output is retained across executions.
 
